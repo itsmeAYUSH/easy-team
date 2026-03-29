@@ -3,7 +3,12 @@ import { createClient } from '@/util/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 
-export default async function ProjectDetailPage({ params }: { params: { id: string } }) {
+export default async function ProjectDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
   const profile = await getProfile()
   if (!profile) redirect('/login')
 
@@ -12,21 +17,21 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
   const { data: project } = await supabase
     .from('projects')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', id)
     .single()
 
   if (!project) redirect('/projects')
 
   const { data: tasks } = await supabase
     .from('tasks')
-    .select('*, profiles(full_name)')
-    .eq('project_id', params.id)
+    .select('*')
+    .eq('project_id', id)
     .order('created_at', { ascending: false })
 
   async function deleteProject() {
     'use server'
     const supabase = await createClient()
-    await supabase.from('projects').delete().eq('id', params.id)
+    await supabase.from('projects').delete().eq('id', id)
     redirect('/projects')
   }
 
@@ -52,7 +57,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
       <div className="flex items-center justify-between mt-8 mb-4">
         <p className="text-sm font-medium">tasks</p>
         {(profile.role === 'admin' || profile.role === 'manager') && (
-          <Link href={`/tasks/new?project=${params.id}`}
+          <Link href={`/tasks/new?project=${id}`}
             className="text-xs border border-black rounded px-2 py-1 hover:bg-black-100">
                 new task
           </Link>
