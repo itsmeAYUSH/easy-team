@@ -1,24 +1,19 @@
 import { getProfile } from '@/lib/auth'
-import { createClient } from '@/util/supabase/server'
+import { serverApi } from '@/lib/api.server'
 import { redirect } from 'next/navigation'
 
 export default async function UsersPage() {
   const profile = await getProfile()
   if (!profile || profile.role !== 'admin') redirect('/forbidden')
 
-  const supabase = await createClient()
-  const { data: users } = await supabase
-    .from('profiles')
-    .select('*')
-    .order('created_at', { ascending: false })
+  const users = await serverApi.getUsers()
 
   async function updateRole(formData: FormData) {
     'use server'
-    const supabase = await createClient()
-    await supabase
-      .from('profiles')
-      .update({ role: formData.get('role') as string })
-      .eq('id', formData.get('id') as string)
+    await serverApi.updateRole(
+      formData.get('id') as string,
+      formData.get('role') as string
+    )
     redirect('/users')
   }
 
@@ -26,19 +21,16 @@ export default async function UsersPage() {
     <div>
       <h1 className="text-lg font-semibold mb-6">users</h1>
       <div className="divide-y border border-black rounded">
-        {users?.map(u => (
+        {users?.map((u: any) => (
           <div key={u.id} className="flex items-center justify-between px-4 py-3">
             <div>
-              <p className="text-sm">{u.full_name}</p>
+              <p className="text-sm">{u.full_name}</p>  
               <p className="text-xs text-black-400">{u.email}</p>
             </div>
             <form action={updateRole} className="flex items-center gap-2">
               <input type="hidden" name="id" value={u.id} />
-              <select
-                name="role"
-                defaultValue={u.role}
-                className="text-xs border border-black rounded px-2 py-1 outline-none"
-              >
+              <select name="role" defaultValue={u.role}
+                className="text-xs border border-black rounded px-2 py-1 outline-none">
                 <option value="admin">admin</option>
                 <option value="manager">manager</option>
                 <option value="employee">employee</option>

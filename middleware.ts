@@ -31,6 +31,7 @@ export async function middleware(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user && !PUBLIC_ROUTES.includes(pathname)) {
+    if (pathname.startsWith('/api')) return response
     return NextResponse.redirect(new URL('/login', req.url))
   }
 
