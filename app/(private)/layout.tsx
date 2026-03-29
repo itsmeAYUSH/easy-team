@@ -24,6 +24,7 @@ export default async function PrivateLayout({ children }: { children: React.Reac
           <div className="flex items-center gap-6 text-sm">
             <Link href="/dashboard" className="text-black">Dashboard</Link>
             <Link href="/projects" className="text-black">Projects</Link>
+            <Link href="/tasks" className="text-black">Tasks</Link>
             {profile.role === 'admin' && (
               <Link href="/users" className="text-black">Users</Link>
             )}
