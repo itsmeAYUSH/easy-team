@@ -8,8 +8,6 @@ export default async function PrivateLayout({ children }: { children: React.Reac
   const profile = await getProfile()
   if (!profile) redirect('/login')
 
-  const supabase = await createClient()
-
   async function signOut() {
     'use server'
     const supabase = await createClient()
