@@ -15,34 +15,27 @@ export default async function TaskDetailPage({
 
   const supabase = await createClient();
 
-  // const { data: task } = await supabase
-  //   .from('tasks')
-  //   .select('*, projects(name), profiles(full_name)')
-  //   .eq('id', id)
-  //   .single()
-  const { data: task, error } = await supabase
-  .from('tasks')
-  .select('*, projects(name)')
-  .eq('id', id)
-  .single()
-
-console.log('task:', task, 'error:', error)
+  const { data: task } = await supabase
+    .from("tasks")
+    .select("*, projects(name)")
+    .eq("id", id)
+    .single();
 
   if (!task) redirect("/tasks");
 
-let assigneeName = null
-if (task.assigned_to) {
-  const { data: assignee } = await supabase
-    .from('profiles')
-    .select('full_name')
-    .eq('id', task.assigned_to)
-    .single()
-  assigneeName = assignee?.full_name
-}
+  if (profile.role === "employee" && task.assigned_to !== profile.id) {
+    redirect("/forbidden");
+  }
 
-  // if (profile.role === "employee" && task.assigned_to !== profile.id) {
-  //   redirect("/forbidden");
-  // }
+  let assigneeName = null;
+  if (task.assigned_to) {
+    const { data: assignee } = await supabase
+      .from("profiles")
+      .select("full_name")
+      .eq("id", task.assigned_to)
+      .single();
+    assigneeName = assignee?.full_name;
+  }
 
   const { data: employees } = await supabase
     .from("profiles")
@@ -105,8 +98,7 @@ if (task.assigned_to) {
 
       <div className="text-xs text-black-400 mb-6 flex gap-4">
         {task.projects?.name && <span>project: {task.projects.name}</span>}
-        {task.assignee?.full_name && <span>assigned: {task.assignee.full_name}</span>}
-        
+        {assigneeName && <span>assigned: {assigneeName}</span>}
       </div>
 
       {isEmployee ? (

@@ -1,10 +1,16 @@
-import { getProfile } from '@/lib/auth'
-import { createClient } from '@/util/supabase/server'
-import { redirect } from 'next/navigation'
+import { getProfile } from "@/lib/auth";
+import { createClient } from "@/util/supabase/server";
+import { redirect } from "next/navigation";
 
-export default async function NewTaskPage({ searchParams }: { searchParams: { project?: string } }) {
-  const profile = await getProfile()
-  if (!profile || profile.role === 'employee') redirect('/forbidden')
+export default async function NewTaskPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ project?: string }>;
+}) {
+  const { project } = await searchParams;
+  
+  const profile = await getProfile();
+  if (!profile || profile.role === "employee") redirect("/forbidden");
 
   const supabase = await createClient()
 
@@ -56,7 +62,7 @@ export default async function NewTaskPage({ searchParams }: { searchParams: { pr
           <select
             name="project_id"
             required
-            defaultValue={searchParams.project ?? ''}
+            defaultValue={project ?? ""}
             className="w-full border border-black rounded px-3 py-2 text-sm outline-none"
           >
             <option value="">select a project</option>
